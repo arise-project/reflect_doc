@@ -11,39 +11,90 @@ namespace reflect_doc
 {
     class Program
     {
-        private static Type GetEntityType(string typeName)
+        private static Type GetEntityType(string typeName, Assembly [] assemblies)
         {
             new Process();
-            List<System.Reflection.Assembly> assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+            //List<System.Reflection.Assembly> assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
 
             foreach (var assembly in assemblies)
             {
-                Type t = assembly.GetType(typeName, false);
-                if (t != null)
-                    return t;
+                var types = assembly.GetTypes();
+                foreach (var type in types)
+                {
+                    //Console.WriteLine(type.Name);
+                    if (type.Name == typeName)
+                    {
+                        Console.WriteLine("=========");
+                        Console.WriteLine("Type: " + type.Name);
+                        Console.WriteLine("Namespace: " + type.Namespace);
+                        Console.WriteLine("=========");
+                        return type;
+                    }
+                }
             }
 
-            throw new ArgumentException(
-                "Type " + typeName + " doesn't exist in the current app domain");
+            Console.WriteLine("Type " + typeName + " doesn't exist in the current app domain");
+            Environment.Exit(1);
+            return null;
         }
 
         static void Main(string[] args)
         {
 			if(args.Length == 0)
 			{
-				
 				Console.WriteLine("Usage: reflect_doc <type name> <assembly file>");
 				return;
 			}
 
-            Type type = GetEntityType(args[0]);
+            List<System.Reflection.Assembly> assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
 
-			if(args.Length == 2)
+            if(args.Length == 2)
 			{
-				Assembly assembly = Assembly.LoadFrom(args[1]);
-				//DocsByReflection.Docs.GenerateDocs(type, assembly);
+                if(File.Exists(args[1]))
+                {
+                    Assembly assembly = Assembly.LoadFrom(args[1]);
+                    Console.WriteLine(" + Loaded assembly: " + assembly.FullName);
+                    assemblies = new List<Assembly>() { assembly };
+                    //DocsByReflection.Docs.GenerateDocs(type, assembly);
+                }
+				else
+                {
+                   Console.WriteLine("Assembly file " + args[1] + " doesn't exist");
+                     Environment.Exit(1); 
+                }
 			}
+            else if(args.Length == 3)
+            {
+                if(Directory.Exists(args[1]))
+                {
+                    var files = Directory
+                        .GetFiles(args[1],"*.dll",SearchOption.AllDirectories)
+                        .Where(f => Path.GetFileName(f).StartsWith(args[2]))
+                        .GroupBy(f => Path.GetFileName(f)).Select(g => g.First());
 
+                    foreach(string file in files)
+                    {
+                        Assembly assembly = Assembly.LoadFrom(file);
+                        Console.WriteLine(" + Loaded assembly: " + assembly.FullName);
+                        assemblies.Add(assembly);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Directory " + args[1] + " doesn't exist");
+                    Environment.Exit(1);
+                }
+                Console.WriteLine(" + Loaded assembly: " + Assembly.GetExecutingAssembly().FullName);
+                assemblies = new List<Assembly>() { Assembly.GetExecutingAssembly() };
+            }
+            else
+            {
+                Console.WriteLine("Usage: reflect_doc <type name> <assembly file>");
+                Environment.Exit(1);
+            }
+
+            Type type = GetEntityType(args[0], assemblies.ToArray());
+            
             var search = args.Length > 1 ? args[1] : null;
 
             FieldInfo[] fields = type.GetFields();
