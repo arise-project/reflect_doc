@@ -18,18 +18,26 @@ namespace reflect_doc
 
             foreach (var assembly in assemblies)
             {
-                var types = assembly.GetTypes();
-                foreach (var type in types)
+                try
                 {
-                    //Console.WriteLine(type.Name);
-                    if (type.Name == typeName)
+                    var types = assembly.GetTypes();
+                    foreach (var type in types)
                     {
-                        Console.WriteLine("=========");
-                        Console.WriteLine("Type: " + type.Name);
-                        Console.WriteLine("Namespace: " + type.Namespace);
-                        Console.WriteLine("=========");
-                        return type;
+                        //Console.WriteLine(type.Name);
+                        if (type.Name.IndexOf(typeName, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            Console.WriteLine("=========");
+                            Console.WriteLine("Type: " + type.Name);
+                            Console.WriteLine("Namespace: " + type.Namespace);
+                            Console.WriteLine("Assembly: " + type.Assembly.FullName);
+                            Console.WriteLine("=========");
+                            return type;
+                        }
                     }
+                }
+                catch
+                {
+                    continue;
                 }
             }
 
@@ -65,6 +73,8 @@ namespace reflect_doc
 			}
             else if(args.Length == 3)
             {
+                Console.WriteLine("Loaded assembly: ");
+                    
                 if(Directory.Exists(args[1]))
                 {
                     var files = Directory
@@ -75,7 +85,7 @@ namespace reflect_doc
                     foreach(string file in files)
                     {
                         Assembly assembly = Assembly.LoadFrom(file);
-                        Console.WriteLine(" + Loaded assembly: " + assembly.FullName);
+                        Console.WriteLine("\t + " + assembly.FullName);
                         assemblies.Add(assembly);
                     }
                 }
@@ -84,8 +94,7 @@ namespace reflect_doc
                     Console.WriteLine("Directory " + args[1] + " doesn't exist");
                     Environment.Exit(1);
                 }
-                Console.WriteLine(" + Loaded assembly: " + Assembly.GetExecutingAssembly().FullName);
-                assemblies = new List<Assembly>() { Assembly.GetExecutingAssembly() };
+                
             }
             else
             {
