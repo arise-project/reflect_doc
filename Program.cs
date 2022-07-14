@@ -29,7 +29,20 @@ namespace reflect_doc
 
         static void Main(string[] args)
         {
+			if(args.Length == 0)
+			{
+				
+				Console.WriteLine("Usage: reflect_doc <type name> <assembly file>");
+				return;
+			}
+
             Type type = GetEntityType(args[0]);
+
+			if(args.Length == 2)
+			{
+				Assembly assembly = Assembly.LoadFrom(args[1]);
+				//DocsByReflection.Docs.GenerateDocs(type, assembly);
+			}
 
             var search = args.Length > 1 ? args[1] : null;
 
