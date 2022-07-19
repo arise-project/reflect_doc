@@ -11,4 +11,6 @@ dotnet tool uninstall --global dotnet-format
 
 dotnet run -- Log C:\Users\ep\.nuget\packages\serilog\2.10.0\lib\netstandard2.1\Serilog.dll
 
+dotnet run -- Rectangle C:\Users\ep\.nuget\packages\itext7 itext
+
 ------------------

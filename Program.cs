@@ -13,7 +13,6 @@ namespace reflect_doc
     {
         private static Type GetEntityType(string typeName, Assembly [] assemblies)
         {
-            new Process();
             //List<System.Reflection.Assembly> assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
 
             foreach (var assembly in assemblies)
@@ -50,7 +49,9 @@ namespace reflect_doc
         {
 			if(args.Length == 0)
 			{
-				Console.WriteLine("Usage: reflect_doc <type name> <assembly file>");
+				Console.WriteLine("Usage:");
+				Console.WriteLine("reflect_doc <type name> <assembly file>");
+                Console.WriteLine("reflect_doc <assembly directory> <assembly file>");
 				return;
 			}
 
